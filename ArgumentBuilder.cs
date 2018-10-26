@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Vitevic.Shared
 {
+    /// This class are IEnumerable<string> to allow syntax like this:
+    /// 
     public class ArgumentBuilder : IEnumerable<string>
     {
         public const string DefaultArgumentSeparator = " ";

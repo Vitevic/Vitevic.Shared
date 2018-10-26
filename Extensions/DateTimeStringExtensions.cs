@@ -2,16 +2,28 @@
 
 namespace Vitevic.Shared.Extensions
 {
-    static class DateTimeStringExtensions
+    public static class DateTimeExtensions
     {
-        /// <summary>
-        /// Midnight 1 January 1970.
-        /// </summary>
-        public static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        public static DateTime ParseUnixTime(this string unixTime)
+        public static DateTime ParseUnixTime(this string unixTimeSeconds)
         {
-            return UnixEpoch.AddSeconds(long.Parse(unixTime)).ToLocalTime();
+            return long.Parse(unixTimeSeconds).FromUnixTime();
+        }
+
+        public static DateTime ParseUnixTimeUtc(this string unixTimeSeconds)
+        {
+            return long.Parse(unixTimeSeconds).FromUnixTimeUtc();
+        }
+
+        public static DateTime FromUnixTime(this long unixTimeSeconds)
+        {
+            var offset = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds);
+            return offset.LocalDateTime;
+        }
+
+        public static DateTime FromUnixTimeUtc(this long unixTimeSeconds)
+        {
+            var offset = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds);
+            return offset.UtcDateTime;
         }
     }
 }

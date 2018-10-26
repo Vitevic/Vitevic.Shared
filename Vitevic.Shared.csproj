@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-	<BaseIntermediateOutputPath>$(SolutionDir)\obj</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>$(SolutionDir)\obj</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,7 +50,8 @@
   <ItemGroup>
     <Compile Include="ArgumentBuilder.cs" />
     <Compile Include="ArgumentBuilderExtensions.cs" />
-    <Compile Include="Extensions\DateTimeStringExtensions.cs" />
+    <Compile Include="Extensions\DateTimeExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionUtils.cs" />
     <Compile Include="Shell.cs" />

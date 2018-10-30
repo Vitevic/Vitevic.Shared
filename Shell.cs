@@ -143,6 +143,8 @@ namespace Vitevic.Shared
                 process.StartInfo.WorkingDirectory = workingDirectory;
 
             process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
 

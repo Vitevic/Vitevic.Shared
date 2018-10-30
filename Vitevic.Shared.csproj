@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="ArgumentBuilder.cs" />
     <Compile Include="ArgumentBuilderExtensions.cs" />
+    <Compile Include="Extensions\StringPathExtensions.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

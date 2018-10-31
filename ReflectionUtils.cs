@@ -89,5 +89,97 @@ namespace Vitevic.Shared
             }
             return false;
         }
+
+        public static void CallMethod(object instance, string methodName)
+        {
+            try
+            {
+                var method = GetMethodInfo(instance, methodName);
+                if (method != null)
+                {
+                    method.Invoke(instance, null);
+                }
+            }
+            catch (Exception exception)
+            {
+                // TODO: Log exception;
+            }
+        }
+
+        public static TResult CallMethod<TResult>(object instance, string methodName)
+        {
+            TResult result = default(TResult);
+            try
+            {
+                var method = GetMethodInfo(instance, methodName);
+                if (method != null)
+                {
+                    result = (TResult)method.Invoke(instance, null);
+                }
+            }
+            catch (Exception exception)
+            {
+                // TODO: Log exception;
+            }
+
+            return result;
+        }
+
+        public static bool HasProperty(object instance, string propertyName)
+        {
+            return GetPropertyInfo(instance, propertyName) != null;
+        }
+
+        public static object GetPropertyValue(object instance, string propertyName)
+        {
+            object result = null;
+            try
+            {
+                var property = GetPropertyInfo(instance, propertyName);
+                if (property != null)
+                {
+                    return property.GetValue(instance);
+                }
+            }
+            catch (Exception exception)
+            {
+                // TODO: Log exception;
+            }
+
+            return result;
+        }
+        public static TResult GetPropertyValue<TResult>(object instance, string propertyName)
+        {
+            return (TResult)GetPropertyValue(instance, propertyName);
+        }
+
+        public static MethodInfo GetMethodInfo(object instance, string methodName)
+        {
+            var type = instance.GetType();
+            // try public first
+            var method = type.GetMethod(methodName);
+            if (method == null)
+            {
+                method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            }
+
+            return method;
+        }
+
+        public static PropertyInfo GetPropertyInfo(object instance, string propertyName)
+        {
+            Type type = instance.GetType();
+            PropertyInfo property = type.GetProperty(propertyName);
+            if (property == null)
+            {
+                property = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            }
+            if( property == null )
+            {
+                var allProperties = type.GetInterfaces().Select(i => i.GetProperty(propertyName));
+                property = allProperties.FirstOrDefault();
+            }
+            return property;
+        }
     }
 }

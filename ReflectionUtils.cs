@@ -52,6 +52,39 @@ namespace Vitevic.Shared
             return type;
         }
 
+        /// <summary>
+        /// Tries to create object using non public constructor.
+        /// </summary>
+        /// <param name="assemblyName"></param>
+        /// <param name="typeName"></param>
+        /// <param name=""></param>
+        /// <returns></returns>
+        public static object CreateObject(string assemblyName, string typeName, params object[] arguments)
+        {
+            var type = GetType(assemblyName, typeName);
+            var ctors = type.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic);
+            object result = null;
+            foreach(var ctor in ctors)
+            {
+                var parameters = ctor.GetParameters();
+                if( parameters.Length == arguments.Length )
+                {
+                    try
+                    {
+                        result = ctor.Invoke(arguments);
+                    }
+                    catch(Exception)
+                    {
+                    }
+
+                    if (result != null)
+                        break;
+                }
+            }
+
+            return result;
+        }
+
         public static bool QueryStaticPropertyValue<T>(Type type, string propertyName, out T value)
         {
             try
@@ -90,6 +123,26 @@ namespace Vitevic.Shared
             return false;
         }
 
+        public static MethodInfo GetMethodInfo(object instance, string methodName)
+        {
+            var type = instance.GetType();
+            // try public first
+            var method = type.GetMethod(methodName);
+            if (method == null)
+            {
+                method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            }
+
+            if (method == null)
+            {
+                var allMethods = type.GetInterfaces().Select(i => i.GetMethod(methodName));
+                method = allMethods.FirstOrDefault();
+            }
+
+
+            return method;
+        }
+
         public static void CallMethod(object instance, string methodName)
         {
             try
@@ -100,9 +153,9 @@ namespace Vitevic.Shared
                     method.Invoke(instance, null);
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                // TODO: Log exception;
+                Debug.WriteLine($"{nameof(CallMethod)}1('{instance}', '{methodName}') failed: {ex}");
             }
         }
 
@@ -117,9 +170,44 @@ namespace Vitevic.Shared
                     result = (TResult)method.Invoke(instance, null);
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                // TODO: Log exception;
+                Debug.WriteLine($"{nameof(CallMethod)}2('{instance}', '{methodName}') failed: {ex}");
+
+            }
+
+            return result;
+        }
+
+        public static void CallMethod(object instance, string methodName, params object[] arguments)
+        {
+            try
+            {
+                var method = GetMethodInfo(instance, methodName);
+                if (method != null)
+                {
+                    method.Invoke(instance, arguments);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{nameof(CallMethod)}3('{instance}', '{methodName}') failed: {ex}");
+            }
+        }
+        public static TResult CallMethod<TResult>(object instance, string methodName, params object[] arguments)
+        {
+            TResult result = default(TResult);
+            try
+            {
+                var method = GetMethodInfo(instance, methodName);
+                if (method != null)
+                {
+                    result = (TResult)method.Invoke(instance, arguments);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{nameof(CallMethod)}4('{instance}', '{methodName}') failed: {ex}");
             }
 
             return result;
@@ -141,9 +229,9 @@ namespace Vitevic.Shared
                     return property.GetValue(instance);
                 }
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                // TODO: Log exception;
+                Debug.WriteLine($"{nameof(GetPropertyValue)}('{instance}', '{propertyName}') failed: {ex}");
             }
 
             return result;
@@ -151,19 +239,6 @@ namespace Vitevic.Shared
         public static TResult GetPropertyValue<TResult>(object instance, string propertyName)
         {
             return (TResult)GetPropertyValue(instance, propertyName);
-        }
-
-        public static MethodInfo GetMethodInfo(object instance, string methodName)
-        {
-            var type = instance.GetType();
-            // try public first
-            var method = type.GetMethod(methodName);
-            if (method == null)
-            {
-                method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            }
-
-            return method;
         }
 
         public static PropertyInfo GetPropertyInfo(object instance, string propertyName)

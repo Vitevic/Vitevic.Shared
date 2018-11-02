@@ -136,7 +136,7 @@ namespace Vitevic.Shared
             var process = new Process();
             process.StartInfo.FileName = exePath;
 
-            var ab = new ArgumentBuilder { arguments };
+            var ab = arguments is ArgumentBuilder ? (ArgumentBuilder)arguments : new ArgumentBuilder { arguments };
             process.StartInfo.Arguments = ab.ToString();
 
             if (workingDirectory != null)
@@ -198,8 +198,7 @@ namespace Vitevic.Shared
 
         public static (int, string, string) RunCommandIn(string workingDirectory, IDictionary<string, string> env, string command, IEnumerable<string> arguments)
         {
-            var args = new List<string> { "/c", command };
-            args.AddRange(arguments);
+            var args = new ArgumentBuilder{ "/c", command, arguments };
             return RunExeIn(workingDirectory, env, "cmd", args);
         }
         public static (int, string, string) RunCommandIn(string workingDirectory, string command, params string[] arguments)

@@ -89,5 +89,15 @@ namespace Vitevic.Shared.Extensions
 
             return resource.ToString();
         }
+
+        public static bool PathEquals(this string path, string another)
+        {
+            return path.NormalizePath() == another.NormalizePath();
+        }
+
+        public static bool PathStartsWith(this string path, string another)
+        {
+            return path.NormalizePath().StartsWith(another.NormalizePath());
+        }
     }
 }

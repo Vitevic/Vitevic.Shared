@@ -12,14 +12,26 @@ namespace Vitevic.Shared
         private Dictionary<TKey, TValue> _dictionary;
         private Queue<TKey> _keys;
 
-        public LimitedDictionary(uint maxCapacity)
+        public LimitedDictionary(uint maxCapacity, IEqualityComparer<TKey> comparer = null)
         {
-            _dictionary = new Dictionary<TKey, TValue>();
+            _dictionary = new Dictionary<TKey, TValue>(comparer);
             _keys = new Queue<TKey>();
-            MaxCapacity = maxCapacity;
+            _maxCapacity = maxCapacity;
         }
 
-        public uint MaxCapacity { get; set; }
+        uint _maxCapacity = uint.MaxValue;
+        public uint MaxCapacity {
+            get { return _maxCapacity; }
+            set
+            {
+                _maxCapacity = value;
+                while( _maxCapacity > _dictionary.Count )
+                {
+                    var oldestKey = _keys.Dequeue();
+                    _dictionary.Remove(oldestKey);
+                }
+            }
+        }
 
         #region IDictionary<TKey, TValue>
 
@@ -43,6 +55,7 @@ namespace Vitevic.Shared
             }
 
             _dictionary.Add(key, value);
+            _keys.Enqueue(key);
         }
 
         public void Add(KeyValuePair<TKey, TValue> item)
@@ -81,7 +94,14 @@ namespace Vitevic.Shared
             var res = _dictionary.Remove(key);
             if( res )
             {
-                _keys = new Queue<TKey>( _keys.Where(x => !object.Equals(x,key)) );
+                if( Equals(key, _keys.Peek()) )
+                {
+                    _keys.Dequeue();
+                }
+                else
+                {
+                    _keys = new Queue<TKey>(_keys.Where(x => !Equals(x, key)));
+                }
             }
             return res;
         }

@@ -99,5 +99,15 @@ namespace Vitevic.Shared.Extensions
         {
             return path.NormalizePath().StartsWith(another.NormalizePath());
         }
+
+        public static string SafePath(this string path)
+        {
+            if( path.Contains(" ") && !path.StartsWith("\"") )
+            {
+                return '"' + path + '"';
+            }
+
+            return path;
+        }
     }
 }

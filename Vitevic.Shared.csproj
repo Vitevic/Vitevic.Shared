@@ -45,6 +45,7 @@
     <Compile Include="ArgumentBuilder.cs" />
     <Compile Include="ArgumentBuilderExtensions.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
+    <Compile Include="Extensions\RegistryExtensions.cs" />
     <Compile Include="NormalizedPathComparer.cs" />
     <Compile Include="Extensions\StringPathExtensions.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />

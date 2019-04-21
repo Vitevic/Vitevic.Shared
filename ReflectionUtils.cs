@@ -1,4 +1,6 @@
-﻿using System;
+﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -62,6 +64,9 @@ namespace Vitevic.Shared
         public static object CreateObject(string assemblyName, string typeName, params object[] arguments)
         {
             var type = GetType(assemblyName, typeName);
+            if (type == null)
+                return null;
+
             var ctors = type.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic);
             object result = null;
             foreach(var ctor in ctors)

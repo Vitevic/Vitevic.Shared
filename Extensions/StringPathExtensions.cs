@@ -1,7 +1,10 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Vitevic.Shared.Extensions
@@ -111,5 +114,62 @@ namespace Vitevic.Shared.Extensions
 
             return path;
         }
+
+        /// <summary>
+        /// Converts given path (d:\src\File.txt) to the real one (d:\src\File.txt).
+        /// Resolves symlink!!!
+        /// </summary>
+        /// <remarks>
+        /// https://stackoverflow.com/a/41409734
+        /// </remarks>       
+        public static string CaseSensitivePath(this string path)
+        {
+            // use 0 for access so we can avoid error on our metadata-only query (see dwDesiredAccess docs on CreateFile)
+            // use FILE_FLAG_BACKUP_SEMANTICS for attributes so we can operate on directories (see Directories in remarks section for CreateFile docs)
+            using (var handle = NativeMethods.CreateFile(path, 0,
+                FileShare.ReadWrite | FileShare.Delete, IntPtr.Zero, FileMode.Open,
+                (FileAttributes)NativeMethods.FILE_FLAG_BACKUP_SEMANTICS, IntPtr.Zero))
+            {
+                if (handle.IsInvalid)
+                    throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+
+                return GetFinalPathNameByHandle(handle);
+            }
+        }
+
+        static string GetFinalPathNameByHandle(SafeFileHandle fileHandle)
+        {
+            StringBuilder outPath = new StringBuilder(1024);
+
+            var size = NativeMethods.GetFinalPathNameByHandle(fileHandle, outPath, (uint)outPath.Capacity, NativeMethods.FILE_NAME_NORMALIZED);
+            if (size == 0 || size > outPath.Capacity)
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+
+            // may be prefixed with \\?\, which we don't want
+            if (outPath[0] == '\\' && outPath[1] == '\\' && outPath[2] == '?' && outPath[3] == '\\')
+                return outPath.ToString(4, outPath.Length - 4);
+
+            return outPath.ToString();
+        }
+
+        private class NativeMethods
+        {
+            [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+            public static extern uint GetFinalPathNameByHandle(SafeFileHandle hFile, [MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpszFilePath, uint cchFilePath, uint dwFlags);
+            public const uint FILE_NAME_NORMALIZED = 0x0;
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            public static extern SafeFileHandle CreateFile([MarshalAs(UnmanagedType.LPTStr)] string filename,
+                                                     [MarshalAs(UnmanagedType.U4)] FileAccess access,
+                                                     [MarshalAs(UnmanagedType.U4)] FileShare share,
+                                                     IntPtr securityAttributes, // optional SECURITY_ATTRIBUTES struct or IntPtr.Zero
+                                                     [MarshalAs(UnmanagedType.U4)] FileMode creationDisposition,
+                                                     [MarshalAs(UnmanagedType.U4)] FileAttributes flagsAndAttributes,
+                                                     IntPtr templateFile);
+            public const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
+        }
+
     }
+
+
 }

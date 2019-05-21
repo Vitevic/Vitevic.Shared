@@ -130,20 +130,22 @@ namespace Vitevic.Shared.Extensions
                 FileShare.ReadWrite | FileShare.Delete, IntPtr.Zero, FileMode.Open,
                 (FileAttributes)NativeMethods.FILE_FLAG_BACKUP_SEMANTICS, IntPtr.Zero))
             {
+                var err = Marshal.GetLastWin32Error();
                 if (handle.IsInvalid)
-                    throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                    throw new System.ComponentModel.Win32Exception(err);
 
-                return GetFinalPathNameByHandle(handle);
+                return GetFinalPathNameBy(handle);
             }
         }
 
-        static string GetFinalPathNameByHandle(SafeFileHandle fileHandle)
+        static string GetFinalPathNameBy(SafeFileHandle fileHandle)
         {
             StringBuilder outPath = new StringBuilder(1024);
 
             var size = NativeMethods.GetFinalPathNameByHandle(fileHandle, outPath, (uint)outPath.Capacity, NativeMethods.FILE_NAME_NORMALIZED);
+            var err = Marshal.GetLastWin32Error();
             if (size == 0 || size > outPath.Capacity)
-                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+                throw new System.ComponentModel.Win32Exception(err);
 
             // may be prefixed with \\?\, which we don't want
             if (outPath[0] == '\\' && outPath[1] == '\\' && outPath[2] == '?' && outPath[3] == '\\')
@@ -152,14 +154,14 @@ namespace Vitevic.Shared.Extensions
             return outPath.ToString();
         }
 
-        private class NativeMethods
+        private static class NativeMethods
         {
-            [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-            public static extern uint GetFinalPathNameByHandle(SafeFileHandle hFile, [MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpszFilePath, uint cchFilePath, uint dwFlags);
+            [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+            public static extern uint GetFinalPathNameByHandle(SafeFileHandle hFile, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lpszFilePath, uint cchFilePath, uint dwFlags);
             public const uint FILE_NAME_NORMALIZED = 0x0;
 
-            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            public static extern SafeFileHandle CreateFile([MarshalAs(UnmanagedType.LPTStr)] string filename,
+            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+            public static extern SafeFileHandle CreateFile([MarshalAs(UnmanagedType.LPWStr)] string filename,
                                                      [MarshalAs(UnmanagedType.U4)] FileAccess access,
                                                      [MarshalAs(UnmanagedType.U4)] FileShare share,
                                                      IntPtr securityAttributes, // optional SECURITY_ATTRIBUTES struct or IntPtr.Zero
@@ -168,8 +170,5 @@ namespace Vitevic.Shared.Extensions
                                                      IntPtr templateFile);
             public const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
         }
-
     }
-
-
 }

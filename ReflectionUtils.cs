@@ -261,5 +261,64 @@ namespace Vitevic.Shared
             }
             return property;
         }
+
+        public static EventInfo GetEventInfo(object instance, string eventName)
+        {
+            Type type = instance.GetType();
+            EventInfo property = type.GetEvent(eventName);
+            if (property == null)
+            {
+                property = type.GetEvent(eventName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            }
+            if (property == null)
+            {
+                var allEvents = type.GetInterfaces().Select(i => i.GetEvent(eventName));
+                property = allEvents.FirstOrDefault();
+            }
+            return property;
+        }
+
+        public static bool HasEvent(object instance, string eventName)
+        {
+            return GetEventInfo(instance, eventName) != null;
+        }
+
+        public static bool AddEventHandler(object instance, string eventName, Action<object, object> handler)
+        {
+            try
+            {
+                var eventInfo = GetEventInfo(instance, eventName);
+                if (eventInfo != null)
+                {
+                    var eventDelegate = Delegate.CreateDelegate(eventInfo.EventHandlerType, handler.Target, handler.Method);
+                    eventInfo.AddEventHandler(instance, eventDelegate);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{nameof(AddEventHandler)}('{instance}', '{eventName}') failed: {ex}");
+                return false;
+            }
+        }
+
+        public static bool RemoveEventHandler(object instance, string eventName, Action<object, object> handler)
+        {
+            try
+            {
+                var eventInfo = GetEventInfo(instance, eventName);
+                if (eventInfo != null)
+                {
+                    var eventDelegate = Delegate.CreateDelegate(eventInfo.EventHandlerType, handler.Target, handler.Method);
+                    eventInfo.RemoveEventHandler(instance, eventDelegate);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{nameof(AddEventHandler)}('{instance}', '{eventName}') failed: {ex}");
+                return false;
+            }
+        }
     }
 }

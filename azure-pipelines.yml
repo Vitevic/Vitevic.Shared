@@ -16,15 +16,16 @@ variables:
 
 resources:
   repositories:
-  - repository: tests
+  - repository: test
     type: git
-    name: Vitevic.Shared.Tests
+    name: 'Vitevic.Shared.Tests'
 
 steps:
 - checkout: self
-- checkout: tests
-  path: Vitevic.Shared.Tests
-  
+
+- checkout: test
+  path: 'Vitevic.Shared.Tests'
+
 - task: VSBuild@1
   inputs:
     solution: '$(project)'

@@ -14,13 +14,6 @@ variables:
   buildPlatform: 'AnyCPU'
   buildConfiguration: 'Debug'
 
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      # Write your PowerShell commands here.  
-      Write-Host "Hello World"
-
 - task: VSBuild@1
   inputs:
     solution: '$(project)'

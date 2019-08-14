@@ -11,7 +11,7 @@ pool:
 
 variables:
   project: '**/*.csproj'
-  buildPlatform: 'Any CPU'
+  buildPlatform: 'AnyCPU'
   buildConfiguration: 'Debug'
 
 steps:

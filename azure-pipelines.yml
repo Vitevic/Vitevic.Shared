@@ -19,9 +19,14 @@ steps:
   inputs:
     solution: '$(project)'
     vsVersion: '15.0'
+    msbuildArgs: '-t:restore'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(project)'
+    vsVersion: '15.0'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-    restoreNugetPackages: true
 
 #- task: VSTest@2
 #  inputs:

@@ -19,8 +19,7 @@ steps:
   inputs:
     targetType: 'inline'
     script:
-      # Write your PowerShell commands here.
-      Write-Host "Hello World"
+      Get-ChildItem -Path '$(Build.SourcesDirectory)'
     errorActionPreference: 'continue'
 - task: VSBuild@1
   inputs:

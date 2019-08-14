@@ -14,17 +14,12 @@ variables:
   buildPlatform: 'AnyCPU'
   buildConfiguration: 'Debug'
 
-resources:
-  repositories:
-  - repository: test
-    type: git
-    name: 'Vitevic.Shared.Tests'
-
-steps:
-- checkout: self
-
-- checkout: test
-  path: 'Vitevic.Shared.Tests'
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.  
+      Write-Host "Hello World"
 
 - task: VSBuild@1
   inputs:

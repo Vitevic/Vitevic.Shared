@@ -14,7 +14,17 @@ variables:
   buildPlatform: 'AnyCPU'
   buildConfiguration: 'Debug'
 
+resources:
+  repositories:
+  - repository: tests
+    type: git
+    name: Vitevic.Shared.Tests
+
 steps:
+- checkout: self
+- checkout: tests
+  path: Vitevic.Shared.Tests
+  
 - task: VSBuild@1
   inputs:
     solution: '$(project)'
